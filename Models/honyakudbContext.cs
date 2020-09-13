@@ -17,7 +17,9 @@ namespace honyaku_api.Models
 
         public virtual DbSet<Comments> Comments { get; set; }
         public virtual DbSet<Genres> Genres { get; set; }
+        public virtual DbSet<Token> Token { get; set; }
         public virtual DbSet<Users> Users { get; set; }
+        public virtual DbSet<WorkGenre> WorkGenre { get; set; }
         public virtual DbSet<Works> Works { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -25,7 +27,7 @@ namespace honyaku_api.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseNpgsql("Host=localhost;Database=honyaku-db;Username=user;Password=Pass");
+                optionsBuilder.UseNpgsql("Host=localhost;Database=honyaku-db;Username=postgres;Password=Momdad@23");
             }
         }
 
@@ -33,18 +35,21 @@ namespace honyaku_api.Models
         {
             modelBuilder.Entity<Comments>(entity =>
             {
-                entity.HasKey(e => e.CommentId)
-                    .HasName("comments_pkey");
-
                 entity.ToTable("comments");
 
-                entity.Property(e => e.CommentId).HasColumnName("comment_id");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("nextval('comments_comment_id_seq'::regclass)");
 
                 entity.Property(e => e.Author).HasColumnName("author");
 
                 entity.Property(e => e.Comment).HasColumnName("comment");
 
-                entity.Property(e => e.ForTitle).HasColumnName("for_title");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+
+                entity.Property(e => e.Work).HasColumnName("work");
 
                 entity.HasOne(d => d.AuthorNavigation)
                     .WithMany(p => p.Comments)
@@ -52,58 +57,80 @@ namespace honyaku_api.Models
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("comments_author_fkey");
 
-                entity.HasOne(d => d.ForTitleNavigation)
+                entity.HasOne(d => d.WorkNavigation)
                     .WithMany(p => p.Comments)
-                    .HasForeignKey(d => d.ForTitle)
+                    .HasForeignKey(d => d.Work)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("comments_for_title_fkey");
             });
 
             modelBuilder.Entity<Genres>(entity =>
             {
-                entity.HasKey(e => e.GenreId)
-                    .HasName("genres_pkey");
-
                 entity.ToTable("genres");
 
-                entity.Property(e => e.GenreId).HasColumnName("genre_id");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("nextval('genres_genre_id_seq'::regclass)");
 
                 entity.Property(e => e.Genre)
                     .HasColumnName("genre")
                     .HasMaxLength(50);
+            });
 
-                entity.Property(e => e.WorkTitle).HasColumnName("work_title");
+            modelBuilder.Entity<Token>(entity =>
+            {
+                entity.ToTable("token");
 
-                entity.HasOne(d => d.WorkTitleNavigation)
-                    .WithMany(p => p.Genres)
-                    .HasForeignKey(d => d.WorkTitle)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("genres_work_title_fkey");
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreateAt).HasColumnName("create_at");
+
+                entity.Property(e => e.IpAddress)
+                    .HasColumnName("ip_address")
+                    .HasMaxLength(20);
+
+                entity.Property(e => e.UpdateAt).HasColumnName("update_at");
+
+                entity.Property(e => e.UserAgent)
+                    .HasColumnName("user_agent")
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.Property(e => e.Value)
+                    .IsRequired()
+                    .HasColumnName("value")
+                    .HasMaxLength(50);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Token)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.SetNull)
+                    .HasConstraintName("token_user_id_fkey");
             });
 
             modelBuilder.Entity<Users>(entity =>
             {
-                entity.HasKey(e => e.UserId)
-                    .HasName("users_pkey");
-
                 entity.ToTable("users");
 
                 entity.HasIndex(e => e.Email)
-                    .HasName("users_email_key")
+                    .HasName("user_email")
                     .IsUnique();
 
                 entity.HasIndex(e => e.Username)
-                    .HasName("users_username_key")
+                    .HasName("user_username")
                     .IsUnique();
 
-                entity.Property(e => e.UserId).HasColumnName("user_id");
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("nextval('users_user_id_seq'::regclass)");
 
                 entity.Property(e => e.ConfirmPassword)
                     .IsRequired()
                     .HasColumnName("confirm_password")
                     .HasMaxLength(50);
 
-                entity.Property(e => e.CreationDate).HasColumnName("creation_date");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
 
                 entity.Property(e => e.Email)
                     .IsRequired()
@@ -117,9 +144,11 @@ namespace honyaku_api.Models
                     .HasColumnName("password")
                     .HasMaxLength(50);
 
-                entity.Property(e => e.PictureName).HasColumnName("picture_name");
+                entity.Property(e => e.ProfilePicture)
+                    .HasColumnName("profile_picture")
+                    .HasMaxLength(500);
 
-                entity.Property(e => e.ProfilePicture).HasColumnName("profile_picture");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
 
                 entity.Property(e => e.Username)
                     .IsRequired()
@@ -127,14 +156,36 @@ namespace honyaku_api.Models
                     .HasMaxLength(60);
             });
 
-            modelBuilder.Entity<Works>(entity =>
+            modelBuilder.Entity<WorkGenre>(entity =>
             {
-                entity.HasKey(e => e.WorkId)
-                    .HasName("works_pkey");
+                entity.HasKey(e => new { e.WorkId, e.GenreId })
+                    .HasName("work_genre_pkey");
 
-                entity.ToTable("works");
+                entity.ToTable("work_genre");
 
                 entity.Property(e => e.WorkId).HasColumnName("work_id");
+
+                entity.Property(e => e.GenreId).HasColumnName("genre_id");
+
+                entity.HasOne(d => d.Genre)
+                    .WithMany(p => p.WorkGenre)
+                    .HasForeignKey(d => d.GenreId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("work_genre_genre_id_fkey");
+
+                entity.HasOne(d => d.Work)
+                    .WithMany(p => p.WorkGenre)
+                    .HasForeignKey(d => d.WorkId)
+                    .HasConstraintName("work_genre_work_id_fkey");
+            });
+
+            modelBuilder.Entity<Works>(entity =>
+            {
+                entity.ToTable("works");
+
+                entity.Property(e => e.Id)
+                    .HasColumnName("id")
+                    .HasDefaultValueSql("nextval('works_work_id_seq'::regclass)");
 
                 entity.Property(e => e.Category)
                     .IsRequired()
@@ -142,6 +193,10 @@ namespace honyaku_api.Models
                     .HasMaxLength(10);
 
                 entity.Property(e => e.Description).HasColumnName("description");
+
+                entity.Property(e => e.Picture)
+                    .HasColumnName("picture")
+                    .HasMaxLength(500);
 
                 entity.Property(e => e.Title)
                     .IsRequired()

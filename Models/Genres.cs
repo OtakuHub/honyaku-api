@@ -5,10 +5,14 @@ namespace honyaku_api.Models
 {
     public partial class Genres
     {
-        public int GenreId { get; set; }
-        public int WorkTitle { get; set; }
+        public Genres()
+        {
+            WorkGenre = new HashSet<WorkGenre>();
+        }
+
+        public int Id { get; set; }
         public string Genre { get; set; }
 
-        public virtual Works WorkTitleNavigation { get; set; }
+        public virtual ICollection<WorkGenre> WorkGenre { get; set; }
     }
 }
