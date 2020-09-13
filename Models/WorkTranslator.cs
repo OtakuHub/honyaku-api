@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace honyaku_api.Models
 {
-    public partial class WorkGenre
+    public partial class WorkTranslator
     {
         public int Id { get; set; }
         public int? WorkId { get; set; }
-        public int? GenreId { get; set; }
+        public int? TranslatorId { get; set; }
 
-        public virtual Genre Genre { get; set; }
+        public virtual User Translator { get; set; }
         public virtual Work Work { get; set; }
     }
 }
