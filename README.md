@@ -13,6 +13,20 @@ set DATABASE_URL="Host=localhost;Database=honyaku-db;Username=user;Password=pass
 dotnet ef database update
 ```
 
+## Generate Controllers
+
+You can generate controllers using the `dotnet-aspnet-codegenerator` package.
+
+```bash
+dotnet-aspnet-codegenerator \
+  -p honyaku-api.csproj \
+  controller -name UsersController -api \
+  -m honyaku_api.Models.User \
+  -dc honyakuapiContext \
+  -outDir Controllers \
+  -namespace honyaku_api.Controllers
+```
+
 ## Tech Stack
 
 - .net core 3.1
