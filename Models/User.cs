@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using honyaku_api.Data;
 
 namespace honyaku_api.Models
 {
-    public partial class User
+    public partial class User : IEntity
     {
         public User()
         {

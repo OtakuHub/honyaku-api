@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using honyaku_api.Models;
+using honyaku_api.Data.EFCore;
 
 namespace honyaku_api.Migrations
 {

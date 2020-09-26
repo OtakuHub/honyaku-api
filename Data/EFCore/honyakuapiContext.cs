@@ -1,9 +1,9 @@
 ﻿using System;
-using DotNetEnv;
+using honyaku_api.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace honyaku_api.Models
+namespace honyaku_api.Data.EFCore
 {
     public partial class honyakuapiContext : DbContext
     {
@@ -28,7 +28,7 @@ namespace honyaku_api.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseNpgsql(Env.GetString("DATABASE_URL"));
+                optionsBuilder.UseNpgsql(DotNetEnv.Env.GetString("DATABASE_URL"));
             }
         }
 
