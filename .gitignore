@@ -3,6 +3,7 @@
 
 # User-specific files
 .DS_Store
+.env
 *.suo
 *.user
 *.userosscache

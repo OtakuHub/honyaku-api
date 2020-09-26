@@ -1,4 +1,5 @@
 ﻿using System;
+using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -27,7 +28,7 @@ namespace honyaku_api.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URL"));
+                optionsBuilder.UseNpgsql(Env.GetString("DATABASE_URL"));
             }
         }
 
